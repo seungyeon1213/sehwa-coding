@@ -10,6 +10,7 @@ if st.button('환영인사'):
     st.write(name+'님 안녕하세요!')
     st.balloons()
     st.image('https://i.namu.wiki/i/XUmuonckB2a5Q7wVgQn3bvOYgN-CeqEKBTDGXCoQnySsLLb5esdQZdxMmBXOcNxhUtjYJ5VaBH9sk3WHxiMHiQ.webp')
+    st.video('https://www.youtube.com/watch?v=2vuFsbVyoYw')
 
 st.success('성공!')
 st.warning('경고!')
