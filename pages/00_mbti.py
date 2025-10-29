@@ -69,6 +69,28 @@ MBTI_MAP = {
     }
 }
 
+
+transfer_lines = [
+    "💥 그 사람? 너 없이도 잘 사는 척 하지만… 사실 너무 궁금해함.",
+    "🎯 새로운 설렘이 찾아오고 말았다… 빠져든다…",
+    "🔥 전 애인은 이미 추억 속 캐릭터!",
+    "🌪️ 너의 매력에 휘말린 사람 등장!"
+]
+
+reunion_lines = [
+    "💘 서로의 빈자리가 너무 크게 느껴졌다…",
+    "📞 우연히 온 연락 한 통… 다시 시작되는 감정선!",
+    "🧲 티격태격했는데… 결국은 서로였다!",
+    "🌙 그 사람도 사실 계속 생각하고 있었음."
+]
+
+advice_lines = [
+    "✨ 자신감 장착하고 나가라!",
+    "😎 밀당 금지! 솔직함이 최고의 무기.",
+    "🧊 쿨한 척? 하지마! 마음을 드러내!",
+    "🍀 이번엔 너가 행복해지는 방향으로 가자."
+]
+
 def weighted_choice(choices):
     total = sum(w for _, w in choices)
     r = random.random() * total
@@ -79,22 +101,38 @@ def weighted_choice(choices):
         upto += w
     return choices[-1]
 
-
-# ✅ Streamlit UI 구성
-st.title("🎬 MBTI 환승연애 예측기")
-st.markdown("너의 MBTI를 알려주면...\n**환승할지 재회할지 예측해드립니다 🔮**")
+st.title("💔 환승연애 MBTI 운명 판독기 🎬")
+st.caption("※ 실존 인물과 닮았다면…그건 운명입니다 😌")
 
 mbti_input = st.text_input("MBTI 입력 (예: ENFP)").upper()
 
-if st.button("운명 확인하기 💘"):
+if st.button("운명 공개!"):
+
     if mbti_input not in MBTI_MAP:
-        st.error("❌ 올바른 MBTI를 입력해주세요! (예: ISTP, ENTP)")
+        st.error("😡 MBTI 맞게 쓰라고! (예: ISTP, ENTP)")
     else:
         transfer, w_t = weighted_choice(MBTI_MAP[mbti_input]['환승'])
         reunion, w_r = weighted_choice(MBTI_MAP[mbti_input]['재회'])
 
-        st.subheader(f"✨ {mbti_input}의 연애 흐름 예측 결과")
-        st.write(f"🚀 **환승 추천 MBTI**: `{transfer}` → 신뢰도 {round(w_t * 100)}%")
-        st.write(f"💞 **재회 추천 MBTI**: `{reunion}` → 신뢰도 {round(w_r * 100)}%")
+        st.subheader(f"👀 {mbti_input}의 연애 운명 시나리오")
 
-        st.caption("※ 재미로만 봐주세요! 실제 연애 결과를 보장하지 않습니다 😆")
+        mode = random.choice(["환승", "재회"])
+        
+        if mode == "환승":
+            st.info("🚀 **환승 엔딩 예측**")
+            st.write(f"👉 상대 MBTI: **{transfer}**")
+            st.write(f"📈 신뢰도: **{round(w_t*100)}%**")
+            st.write("🎬 시나리오:")
+            st.write(random.choice(transfer_lines))
+        else:
+            st.success("💞 **재회 엔딩 예측**")
+            st.write(f"👉 상대 MBTI: **{reunion}**")
+            st.write(f"📈 신뢰도: **{round(w_r*100)}%**")
+            st.write("🎬 시나리오:")
+            st.write(random.choice(reunion_lines))
+
+        st.write("---")
+        st.write("📌 오늘의 연애 조언:")
+        st.write(random.choice(advice_lines))
+
+        st.caption("※ *당신의 전남친/전여친이 이걸 보고 있다면 긴장해라.* 🤫")
