@@ -1,12 +1,7 @@
-# mbti_hwanseung_prediction.py
-# MBTI를 입력하면 '환승연애'에서 어느 유형으로 환승하거나 재회할 가능성이 높은지 예측해주는 간단한 스크립트
-# (학습된 모델이 아니라 규칙 기반의 재미용 예측입니다. 실제 연애 결과와 다를 수 있음)
-
+import streamlit as st
 import random
-import sys
 
-# MBTI별로 환승 대상 및 재회 대상 추천과 가중치(0~1)
-# 직관적/재미적 매핑: 보통 성향이 보완되는 유형 혹은 감정표현 방식이 맞는 유형을 추천
+# ✅ MBTI 환승 / 재회 추천 데이터셋
 MBTI_MAP = {
     'ISTJ': {
         '환승': [('ESFP', 0.35), ('ENFP', 0.25), ('ISFJ', 0.15), ('ENTJ', 0.10), ('INFP', 0.15)],
@@ -74,62 +69,32 @@ MBTI_MAP = {
     }
 }
 
-
 def weighted_choice(choices):
-    """choices: list of (item, weight). returns an item selected by normalized weights."""
     total = sum(w for _, w in choices)
-    if total == 0:
-        return random.choice([c for c, _ in choices])
     r = random.random() * total
     upto = 0
     for c, w in choices:
         if upto + w >= r:
-            return c
+            return c, w
         upto += w
-    return choices[-1][0]
+    return choices[-1]
 
 
-def predict(mbti: str, seed: int | None = None):
-    """주어진 MBTI에 대해 환승 상대와 재회 상대를 하나씩 추천한다.
-    seed를 주면 결정적 결과를 얻을 수 있다.
-    Returns dict with keys: 'mbti', '환승추천', '재회추천'.
-    """
-    if seed is not None:
-        random.seed(seed)
-    m = mbti.upper()
-    if m not in MBTI_MAP:
-        raise ValueError('유효한 MBTI를 입력해 (예: "INFJ").')
+# ✅ Streamlit UI 구성
+st.title("🎬 MBTI 환승연애 예측기")
+st.markdown("너의 MBTI를 알려주면...\n**환승할지 재회할지 예측해드립니다 🔮**")
 
-    transfer = weighted_choice(MBTI_MAP[m]['환승'])
-    reunion = weighted_choice(MBTI_MAP[m]['재회'])
+mbti_input = st.text_input("MBTI 입력 (예: ENFP)").upper()
 
-    # 간단한 신뢰도(가중치 기반) 계산: 추천된 상대의 가중치를 찾아서 퍼센트로 변환
-    def get_confidence(category, chosen):
-        for c, w in MBTI_MAP[m][category]:
-            if c == chosen:
-                return round(w * 100)
-        return 0
+if st.button("운명 확인하기 💘"):
+    if mbti_input not in MBTI_MAP:
+        st.error("❌ 올바른 MBTI를 입력해주세요! (예: ISTP, ENTP)")
+    else:
+        transfer, w_t = weighted_choice(MBTI_MAP[mbti_input]['환승'])
+        reunion, w_r = weighted_choice(MBTI_MAP[mbti_input]['재회'])
 
-    return {
-        'mbti': m,
-        '환승추천': transfer,
-        '환승신뢰도(%)': get_confidence('환승', transfer),
-        '재회추천': reunion,
-        '재회신뢰도(%)': get_confidence('재회', reunion)
-    }
+        st.subheader(f"✨ {mbti_input}의 연애 흐름 예측 결과")
+        st.write(f"🚀 **환승 추천 MBTI**: `{transfer}` → 신뢰도 {round(w_t * 100)}%")
+        st.write(f"💞 **재회 추천 MBTI**: `{reunion}` → 신뢰도 {round(w_r * 100)}%")
 
-
-if __name__ == '__main__':
-    # CLI 사용 예시: python mbti_hwanseung_prediction.py INFJ 42
-    if len(sys.argv) < 2:
-        print('사용법: python mbti_hwanseung_prediction.py <MBTI> [seed]')
-        sys.exit(1)
-    mbti_input = sys.argv[1]
-    seed = int(sys.argv[2]) if len(sys.argv) >= 3 else None
-    try:
-        result = predict(mbti_input, seed)
-        print(f"너의 MBTI: {result['mbti']}")
-        print(f"환승(가능성 높은 상대): {result['환승추천']} (신뢰도: {result['환승신뢰도(%)']}%)")
-        print(f"재회(가능성 높은 상대): {result['재회추천']} (신뢰도: {result['재회신뢰도(%)']}%)")
-    except ValueError as e:
-        print(e)
+        st.caption("※ 재미로만 봐주세요! 실제 연애 결과를 보장하지 않습니다 😆")
